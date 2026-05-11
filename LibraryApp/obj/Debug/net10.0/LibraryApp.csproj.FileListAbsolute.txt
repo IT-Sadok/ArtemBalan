@@ -12,3 +12,4 @@ C:\Users\User\RiderProjects\LibraryApp\LibraryApp\obj\Debug\net10.0\refint\Libra
 C:\Users\User\RiderProjects\LibraryApp\LibraryApp\obj\Debug\net10.0\LibraryApp.pdb
 C:\Users\User\RiderProjects\LibraryApp\LibraryApp\obj\Debug\net10.0\LibraryApp.genruntimeconfig.cache
 C:\Users\User\RiderProjects\LibraryApp\LibraryApp\obj\Debug\net10.0\ref\LibraryApp.dll
+C:\Users\User\RiderProjects\LibraryApp\LibraryApp\obj\Debug\net10.0\LibraryApp.sourcelink.json
