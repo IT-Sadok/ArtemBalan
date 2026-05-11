@@ -3,5 +3,6 @@
 public enum BookStatus
 {
     Busy,
-    Free
+    Free,
+    Test
 }
