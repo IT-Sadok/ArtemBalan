@@ -8,14 +8,18 @@ public class Book
     public int Id { get; set; }
     public BookStatus Status { get; set; }
 
-    public Book(string title = "Default", string author = "None", int year = 0, int id = -1,
-        BookStatus status = BookStatus.Free)
+    public override string ToString()
+    {
+        return $"{Title} - {Author} {Year}, id:{Id} {Status}";
+    }
+
+    public Book(string title , string author , int year , int id ,
+        BookStatus status )
     {
         Title = title;
         Author = author;
         Year = year;
         Id = id;
-
         Status = status;
     }
 }

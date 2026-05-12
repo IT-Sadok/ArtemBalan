@@ -4,62 +4,85 @@ namespace LibraryApp;
 
 public class Library
 {
-    private Dictionary<int, Book> booksDictionary;
+    private List<Book> bookslist;
+    private IFileManager fileManager;
 
 
     public Library()
     {
-        var books = JsonFileManager.Load<Book>();
-        booksDictionary = books.ToDictionary(book => book.Id, book => book);
+        fileManager = new JsonFileManager();
+        bookslist = fileManager.Load<Book>();
     }
 
     private void SaveChanges()
     {
-        JsonFileManager.Save(booksDictionary.Values.ToList());
+        fileManager.Save(bookslist);
     }
 
     
     public void AddBook(string title, string author, int year, int id)
     {
-        booksDictionary.Add(id, new Book(title, author, year, id, BookStatus.Free));
+        bookslist.Add(new Book(title, author, year, id, BookStatus.Free));
         SaveChanges();
     }
     
     public void DeleteBook(int id)
     {
-        booksDictionary.Remove(id);
+        var book = bookslist.FirstOrDefault(book => book.Id == id);
+        if (book == null)
+            throw new Exception("Book not found");
+        
+        bookslist.Remove(book);
         SaveChanges();
     }
 
     public Book GetBookById(int id)
     {
-        return booksDictionary[id];
+        var book = bookslist.FirstOrDefault(book => book.Id == id);
+        if (book == null)
+            throw new Exception("Book not found");
+        
+        return book;
     }
 
     public Book GetBookByAuthor(string author)
     {
-        return booksDictionary.Values.FirstOrDefault(book => book.Author == author) ?? new Book();
+        var book = bookslist.FirstOrDefault(book => book.Author == author);
+        if (book == null)
+            throw new Exception("Book not found");
+        
+        return book;
     }
 
     public Book GetBookByTitle(string title)
     {
-        return booksDictionary.Values.FirstOrDefault(book => book.Title == title) ?? new Book();
+        var book = bookslist.FirstOrDefault(book => book.Title == title);
+        if (book == null)
+            throw new Exception("Book not found");
+        
+        return book;
     }
 
     public List<Book> GetAllBooks()
     {
-        return booksDictionary.Values.ToList();
+        return bookslist;
     }
 
     public void BorrowBook(int id)
     {
-        booksDictionary[id].Status = BookStatus.Busy;
+        var book = bookslist.FirstOrDefault(book => book.Id == id);
+        if (book == null)
+            throw new Exception("Book not found");
+        book.Status = BookStatus.Busy;
         SaveChanges();
     }
 
     public void ReturnBook(int id)
     {
-        booksDictionary[id].Status = BookStatus.Free;
+        var book = bookslist.FirstOrDefault(book => book.Id == id);
+        if (book == null)
+            throw new Exception("Book not found");
+        book.Status = BookStatus.Free;
         SaveChanges();
     }
 

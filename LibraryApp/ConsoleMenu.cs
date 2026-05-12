@@ -4,8 +4,6 @@ namespace LibraryApp;
 
 public class ConsoleMenu
 {
-    string log = "";
-
     public void Run()
     {
         var library = new Library();
@@ -15,66 +13,88 @@ public class ConsoleMenu
             try
             {
                 ShowMenu();
-                int choice = int.Parse(Console.ReadLine());
+                if(!int.TryParse(Console.ReadLine(), out int choice))
+                    throw new Exception("Wrong choice!");
                 switch (choice)
                 {
                     case 1:
                         ShowBooks(library.GetAllBooks());
-                        log = "";
                         break;
                     case 2:
                     {
-                        Console.Write("Название: ");
+                        Console.Write("Book name: ");
                         string title = Console.ReadLine();
-                        Console.Write("Автор: ");
+                        if(string.IsNullOrEmpty(title))
+                            throw  new Exception("Book name cannot be empty!");
+                        Console.Write("Author: ");
                         string author = Console.ReadLine();
-                        Console.Write("Год: ");
-                        int year = int.Parse(Console.ReadLine());
+                        if(string.IsNullOrEmpty(author))
+                            throw  new Exception("Author cannot be empty!");
+                        
+                        Console.Write("Year: ");
+                        if(!int.TryParse(Console.ReadLine(), out int year))
+                            throw new Exception("Wrong year value!");
+                        
                         Console.Write("Id: ");
-                        int id = int.Parse(Console.ReadLine());
+                        if(!int.TryParse(Console.ReadLine(), out int id))
+                            throw new Exception("Wrong id value!");
 
                         library.AddBook(title, author, year, id);
-                        log = "Book added successfully";
+                        Console.WriteLine("Book added successfully!");
+                        Console.ReadLine();
                         break;
                     }
                     case 3:
                     {
                         Console.Write("Id: ");
-                        int id = int.Parse(Console.ReadLine());
+                        if(!int.TryParse(Console.ReadLine(), out int id))
+                            throw new Exception("Wrong id value!");
+                        
                         library.DeleteBook(id);
-                        log = "Book deleted successfully";
+                        Console.WriteLine("Book deleted successfully!");
+                        Console.ReadLine();
                         break;
                     }
                     case 4:
                     {
-                        Console.Write("Название: ");
+                        Console.Write("Title: ");
                         string title = Console.ReadLine();
+                        if(string.IsNullOrEmpty(title))
+                            throw  new Exception("Title cannot be empty!");
+                        
                         ShowBooks(library.GetBookByTitle(title));
-                        log = "";
                         break;
                     }
                     case 5:
                     {
-                        Console.Write("Автор: ");
+                        Console.Write("Author: ");
                         string author = Console.ReadLine();
+                        if(string.IsNullOrEmpty(author))
+                            throw  new Exception("Author cannot be empty!");
+                        
                         ShowBooks(library.GetBookByAuthor(author));
-                        log = "";
                         break;
                     }
                     case 6:
                     {
                         Console.Write("Id: ");
-                        int id = int.Parse(Console.ReadLine());
+                        if(!int.TryParse(Console.ReadLine(), out int id))
+                            throw new Exception("Wrong id value!");
+                        
                         library.BorrowBook(id);
-                        log = "Book borrowed successfully";
+                        Console.WriteLine("Book borrowed successfully!");
+                        Console.ReadLine();
                         break;
                     }
                     case 7:
                     {
                         Console.Write("Id: ");
-                        int id = int.Parse(Console.ReadLine());
+                        if(!int.TryParse(Console.ReadLine(), out int id))
+                            throw new Exception("Wrong id value!");
+                        
                         library.ReturnBook(id);
-                        log = "Book returned successfully";
+                        Console.WriteLine("Book returned successfully!");
+                        Console.ReadLine();
                         break;
                     }
                     case 0:
@@ -85,7 +105,8 @@ public class ConsoleMenu
             }
             catch (Exception e)
             {
-                log = e.Message;
+                Console.WriteLine(e.Message);
+                Console.ReadLine();
             }
         }
 
@@ -95,7 +116,7 @@ public class ConsoleMenu
     private void ShowBooks(Book book)
     {
         Console.WriteLine("-----------------------");
-        Console.WriteLine($"{book.Title} - {book.Author} {book.Year}, id:{book.Id} {book.Status}");
+        Console.WriteLine(book);
         Console.WriteLine("-----------------------");
         Console.ReadLine();
     }
@@ -104,7 +125,7 @@ public class ConsoleMenu
     {
         Console.WriteLine("-----------------------");
         foreach (var book in books)
-            Console.WriteLine($"{book.Title} - {book.Author} {book.Year}, id:{book.Id} {book.Status}");
+            Console.WriteLine(book);
         Console.WriteLine("-----------------------");
         Console.ReadLine();
     }
@@ -113,18 +134,17 @@ public class ConsoleMenu
     {
         Console.Clear();
         Console.WriteLine("-----------------------");
-        Console.WriteLine("Библиотека");
-        Console.WriteLine("1. Показать все книги");
-        Console.WriteLine("2. Добавить книгу");
-        Console.WriteLine("3. Удалить книгу");
-        Console.WriteLine("4. Поиск по названию");
-        Console.WriteLine("5. Поиск по автору");
-        Console.WriteLine("6. Взять книгу");
-        Console.WriteLine("7. Вернуть книгу");
-        Console.WriteLine("0. Выход");
+        Console.WriteLine("Library Menu");
+        Console.WriteLine("1. Show Books");
+        Console.WriteLine("2. Add Book");
+        Console.WriteLine("3. Delete Book");
+        Console.WriteLine("4. Search Books by Title");
+        Console.WriteLine("5. Search Books by Author");
+        Console.WriteLine("6. Take book");
+        Console.WriteLine("7. Return Book");
+        Console.WriteLine("0. Exit");
         Console.WriteLine("-----------------------");
-        Console.WriteLine(log);
-        Console.Write("Выбор: ");
+        Console.Write("Make choice: ");
     }
 
 }

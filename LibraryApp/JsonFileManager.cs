@@ -2,12 +2,18 @@
 
 namespace LibraryApp;
 
-public static class JsonFileManager
+
+
+public class JsonFileManager: IFileManager
 {
+    private static JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
+    {
+        WriteIndented = true
+    };
     private static string FilePath = "books.json";
 
     
-    public static List<T> Load<T>()
+    public List<T> Load<T>()
     {
         if (!File.Exists(FilePath))
             return new List<T>();
@@ -21,13 +27,10 @@ public static class JsonFileManager
 
     }
 
-    public static void Save<T>(List<T> data)
+    public void Save<T>(List<T> data)
     {
-        var json = JsonSerializer.Serialize(data, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
-
+        
+        var json = JsonSerializer.Serialize(data, jsonSerializerOptions);
         File.WriteAllText(FilePath, json);
     }
 }
