@@ -6,12 +6,24 @@ public class Library
 {
     private List<Book> bookslist;
     private IFileManager fileManager;
+    private BookGenerator bookGenerator;
 
 
-    public Library()
+    private Library(JsonFileManager  fileManager)
     {
-        fileManager = new JsonFileManager();
+        this.fileManager = fileManager;
+    }
+
+    public Library(): this(new JsonFileManager())
+    {
         bookslist = fileManager.Load<Book>();
+    }
+
+    public Library(int generateRandomBooksCount): this(new JsonFileManager())
+    {
+        bookGenerator = new BookGenerator();
+        bookslist = bookGenerator.GenerateBooks(generateRandomBooksCount);
+        SaveChanges();
     }
 
     private void SaveChanges()
@@ -19,7 +31,7 @@ public class Library
         fileManager.Save(bookslist);
     }
 
-    
+
     public void AddBook(string title, string author, int year, int id)
     {
         bookslist.Add(new Book(title, author, year, id, BookStatus.Free));
@@ -31,7 +43,6 @@ public class Library
         var book = bookslist.FirstOrDefault(book => book.Id == id);
         if (book == null)
             throw new Exception("Book not found");
-        
         bookslist.Remove(book);
         SaveChanges();
     }
@@ -41,7 +52,6 @@ public class Library
         var book = bookslist.FirstOrDefault(book => book.Id == id);
         if (book == null)
             throw new Exception("Book not found");
-        
         return book;
     }
 
@@ -50,7 +60,6 @@ public class Library
         var book = bookslist.FirstOrDefault(book => book.Author == author);
         if (book == null)
             throw new Exception("Book not found");
-        
         return book;
     }
 
@@ -59,7 +68,6 @@ public class Library
         var book = bookslist.FirstOrDefault(book => book.Title == title);
         if (book == null)
             throw new Exception("Book not found");
-        
         return book;
     }
 
@@ -86,5 +94,6 @@ public class Library
         SaveChanges();
     }
 
+    
 
 }

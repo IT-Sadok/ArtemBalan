@@ -4,9 +4,13 @@ namespace LibraryApp;
 
 public class ConsoleMenu
 {
+    object locker = new object();
+    private int booksCount = 0;
+    public readonly int generatedBooksCount = 500;
+    
     public void Run()
     {
-        var library = new Library();
+        var library = new Library(generatedBooksCount);
 
         while (true)
         {
@@ -18,7 +22,9 @@ public class ConsoleMenu
                 switch (choice)
                 {
                     case 1:
-                        ShowBooks(library.GetAllBooks());
+                        ShowBooksParallel(library.GetAllBooks());
+                        Console.WriteLine("Books count: " + booksCount);
+                        Console.ReadLine();
                         break;
                     case 2:
                     {
@@ -30,15 +36,12 @@ public class ConsoleMenu
                         string author = Console.ReadLine();
                         if(string.IsNullOrEmpty(author))
                             throw  new Exception("Author cannot be empty!");
-                        
                         Console.Write("Year: ");
                         if(!int.TryParse(Console.ReadLine(), out int year))
                             throw new Exception("Wrong year value!");
-                        
                         Console.Write("Id: ");
                         if(!int.TryParse(Console.ReadLine(), out int id))
                             throw new Exception("Wrong id value!");
-
                         library.AddBook(title, author, year, id);
                         Console.WriteLine("Book added successfully!");
                         Console.ReadLine();
@@ -49,7 +52,6 @@ public class ConsoleMenu
                         Console.Write("Id: ");
                         if(!int.TryParse(Console.ReadLine(), out int id))
                             throw new Exception("Wrong id value!");
-                        
                         library.DeleteBook(id);
                         Console.WriteLine("Book deleted successfully!");
                         Console.ReadLine();
@@ -61,8 +63,8 @@ public class ConsoleMenu
                         string title = Console.ReadLine();
                         if(string.IsNullOrEmpty(title))
                             throw  new Exception("Title cannot be empty!");
-                        
                         ShowBooks(library.GetBookByTitle(title));
+                        Console.ReadLine();
                         break;
                     }
                     case 5:
@@ -71,8 +73,8 @@ public class ConsoleMenu
                         string author = Console.ReadLine();
                         if(string.IsNullOrEmpty(author))
                             throw  new Exception("Author cannot be empty!");
-                        
                         ShowBooks(library.GetBookByAuthor(author));
+                        Console.ReadLine();
                         break;
                     }
                     case 6:
@@ -80,7 +82,6 @@ public class ConsoleMenu
                         Console.Write("Id: ");
                         if(!int.TryParse(Console.ReadLine(), out int id))
                             throw new Exception("Wrong id value!");
-                        
                         library.BorrowBook(id);
                         Console.WriteLine("Book borrowed successfully!");
                         Console.ReadLine();
@@ -91,7 +92,6 @@ public class ConsoleMenu
                         Console.Write("Id: ");
                         if(!int.TryParse(Console.ReadLine(), out int id))
                             throw new Exception("Wrong id value!");
-                        
                         library.ReturnBook(id);
                         Console.WriteLine("Book returned successfully!");
                         Console.ReadLine();
@@ -109,29 +109,50 @@ public class ConsoleMenu
                 Console.ReadLine();
             }
         }
-
     }
-
 
     private void ShowBooks(Book book)
     {
-        Console.WriteLine("-----------------------");
-        Console.WriteLine(book);
-        Console.WriteLine("-----------------------");
-        Console.ReadLine();
+        lock (locker)
+        {
+            Console.WriteLine("-----------------------");
+            Console.WriteLine(book + " Thread:" + Environment.CurrentManagedThreadId.ToString() +
+                              $" Book count {booksCount}");
+            booksCount++;
+        }
+        //Thread.Sleep(1000);
     }
 
-    private void ShowBooks(List<Book> books)
+    private void ShowBooksParallel(List<Book> books)
     {
-        Console.WriteLine("-----------------------");
+        SemaphoreSlim semaphore = new SemaphoreSlim(50);
+        List<Task> tasks = new List<Task>();
         foreach (var book in books)
-            Console.WriteLine(book);
-        Console.WriteLine("-----------------------");
-        Console.ReadLine();
+        {
+            Task task = Task.Run(() =>
+            {
+                semaphore.Wait();
+                try
+                {
+                    ShowBooks(book);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+            tasks.Add(task);
+        }
+        Task.WhenAll(tasks).Wait();
     }
 
     private void ShowMenu()
     {
+        booksCount = 0;
         Console.Clear();
         Console.WriteLine("-----------------------");
         Console.WriteLine("Library Menu");
