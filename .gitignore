@@ -10,6 +10,7 @@ project.lock.json
 *.pyc
 
 # Build results
+.idea/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
