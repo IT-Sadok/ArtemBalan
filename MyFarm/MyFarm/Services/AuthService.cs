@@ -1,52 +1,50 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MyFarm.Data;
 using MyFarm.Models;
+using MyFarm.Interfaces;
 
 namespace MyFarm.Services;
-
-public interface IAuthService
-{
-    Task<IdentityResult> RegisterAsync(UserModel model);
-    Task<string?> LoginAsync(UserModel model);
-}
 
 public class AuthService : IAuthService
 {
     private UserManager<IdentityUser> _userManager;
+    private AuthOptions _jwtOptions;
 
-    public AuthService(UserManager<IdentityUser> userManager)
+    public AuthService(UserManager<IdentityUser> userManager, IOptions<AuthOptions> jwtOptions)
     {
         _userManager = userManager;
+        _jwtOptions = jwtOptions.Value;
     }
 
-    public async Task<IdentityResult> RegisterAsync(UserModel model)
+    public async Task<IdentityResult> RegisterAsync(RegisterModel model, CancellationToken cancellationToken = default)
     {
         var user = new IdentityUser { UserName = model.Username, Email = model.Username };
         return await _userManager.CreateAsync(user, model.Password);
     }
 
-    public async Task<string?> LoginAsync(UserModel model)
+    public async Task<string?> LoginAsync(LoginModel model, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByNameAsync(model.Username);
-        
+
         if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            var claims = new List<Claim> 
-            { 
+            var claims = new List<Claim>
+            {
                 new Claim(ClaimTypes.Name, user.UserName!),
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
             var jwt = new JwtSecurityToken(
-                issuer: AuthOptions.ISSUER,
-                audience: AuthOptions.AUDIENCE,
+                issuer: _jwtOptions.ISSUER,
+                audience: _jwtOptions.AUDIENCE,
                 claims: claims,
                 expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(50)),
                 signingCredentials: new SigningCredentials(
-                    AuthOptions.GetSymmetricSecurityKey(),
+                    _jwtOptions.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);

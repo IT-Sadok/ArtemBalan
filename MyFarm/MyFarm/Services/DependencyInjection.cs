@@ -3,13 +3,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MyFarm.Data;
+using MyFarm.Interfaces;
 
 namespace MyFarm.Services;
 
-public static class AppServices
+public static class DependencyInjection
 {
-    public static IServiceCollection AddAppServices(this IServiceCollection services)
+    public static IServiceCollection AddDependencies(this IServiceCollection services,IConfiguration configuration)
     {
+        services.Configure<AuthOptions>(
+            configuration.GetSection("Jwt"));
+        
+        AuthOptions jwtOptions = configuration
+            .GetSection("Jwt")
+            .Get<AuthOptions>()!;
+        
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         
@@ -30,11 +38,11 @@ public static class AppServices
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = AuthOptions.ISSUER,
+                    ValidIssuer = jwtOptions.ISSUER,
                     ValidateAudience = true,
-                    ValidAudience = AuthOptions.AUDIENCE,
+                    ValidAudience = jwtOptions.AUDIENCE,
                     ValidateLifetime = true,
-                    IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                    IssuerSigningKey = jwtOptions.GetSymmetricSecurityKey(),
                     ValidateIssuerSigningKey = true,
                 };
             });
