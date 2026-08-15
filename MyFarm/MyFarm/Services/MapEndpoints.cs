@@ -14,19 +14,15 @@ public static class MapEndpoints
             {
                 var result = await authService.RegisterAsync(model, cancellationToken);
 
-                if (result.Succeeded)
-                    return Results.Ok("User created successfully!");
-                else
-                    return Results.BadRequest(result.Errors);
+
+                return result.Succeeded ? Results.Ok("User created successfully!") : Results.BadRequest(result.Errors);
             });
 
         app.MapPost("/login", async (LoginModel model, IAuthService authService, CancellationToken cancellationToken) =>
         {
             var token = await authService.LoginAsync(model, cancellationToken);
-            if (token != null)
-                return Results.Ok(token);
-            else
-                return Results.Unauthorized();
+
+            return token != null ? Results.Ok(token) : Results.Unauthorized();
         });
 
         app.MapGet("/protected", [Authorize]() =>

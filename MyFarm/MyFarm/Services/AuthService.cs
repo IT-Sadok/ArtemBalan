@@ -26,7 +26,7 @@ public class AuthService : IAuthService
         return await _userManager.CreateAsync(user, model.Password);
     }
 
-    public async Task<string?> LoginAsync(LoginModel model, CancellationToken cancellationToken = default)
+    public async Task<LoginResponse?> LoginAsync(LoginModel model, CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByNameAsync(model.Username);
 
@@ -47,7 +47,8 @@ public class AuthService : IAuthService
                     _jwtOptions.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
 
-            return new JwtSecurityTokenHandler().WriteToken(jwt);
+            var tokenString =new JwtSecurityTokenHandler().WriteToken(jwt);
+            return new LoginResponse { Token = tokenString };
         }
 
         return null;
